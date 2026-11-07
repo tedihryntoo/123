@@ -2,125 +2,285 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Node-RED Lamp Control</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#080d18">
+<title>Node-RED | Lamp Control</title>
 
-    <style>
-        * {
-            box-sizing: border-box;
-        }
-
-        body {
-            margin: 0;
-            padding: 20px;
-            font-family: Arial, sans-serif;
-            background: #0b1220;
-            color: white;
-        }
-
-        .container {
-            max-width: 450px;
-            margin: 40px auto;
-            padding: 25px;
-            background: #111c2e;
-            border-radius: 18px;
-            text-align: center;
-        }
-
-        h1 {
-            font-size: 24px;
-        }
-
-        .led {
-            width: 85px;
-            height: 85px;
-            border-radius: 50%;
-            background: #374151;
-            margin: 30px auto;
-            transition: 0.3s;
-        }
-
-        .led.on {
-            background: #22c55e;
-            box-shadow: 0 0 30px #22c55e;
-        }
-
-        .status {
-            font-size: 20px;
-            margin-bottom: 30px;
-        }
-
-        button {
-            width: 100%;
-            padding: 17px;
-            margin: 8px 0;
-            border: none;
-            border-radius: 9px;
-            font-size: 17px;
-            font-weight: bold;
-            color: white;
-            cursor: pointer;
-        }
-
-        .up {
-            background: #16a34a;
-        }
-
-        .down {
-            background: #dc2626;
-        }
-
-        .connection {
-            color: #94a3b8;
-            font-size: 13px;
-        }
-    </style>
+<style>
+:root {
+  --bg:#080d18;
+  --panel:#111a2b;
+  --panel2:#18243a;
+  --text:#f1f5f9;
+  --muted:#94a3b8;
+  --green:#22c55e;
+  --red:#ef4444;
+  --blue:#3b82f6;
+  --border:#26354d;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:Arial,sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+  padding:20px;
+}
+.container{max-width:850px;margin:auto}
+header{
+  display:flex;justify-content:space-between;
+  align-items:center;gap:15px;margin-bottom:25px;
+}
+.logo h1{font-size:22px}
+.logo p{color:var(--muted);font-size:13px;margin-top:5px}
+.connection{
+  padding:9px 13px;border-radius:20px;
+  background:var(--panel2);color:var(--muted);font-size:12px;
+}
+.card{
+  background:var(--panel);border:1px solid var(--border);
+  border-radius:16px;padding:24px;margin-bottom:18px;
+}
+.card-title{font-size:16px;margin-bottom:20px}
+.led-area{
+  display:flex;flex-direction:column;
+  align-items:center;padding:25px 10px;
+}
+.led{
+  width:115px;height:115px;border-radius:50%;
+  background:#374151;border:8px solid #26354d;
+  box-shadow:inset 0 0 20px #000;transition:.3s;
+}
+.led.on{
+  background:var(--green);
+  box-shadow:0 0 15px var(--green),0 0 40px #22c55e88,
+  inset 0 0 15px #ffffff66;
+}
+.led-status{margin-top:22px;font-size:22px;font-weight:bold}
+.description{color:var(--muted);font-size:13px;margin-top:8px}
+.controls{display:grid;grid-template-columns:1fr 1fr;gap:15px}
+.btn{
+  padding:16px;border:0;border-radius:11px;
+  color:white;font-size:15px;font-weight:bold;
+  cursor:pointer;transition:.2s;
+}
+.btn:active{transform:scale(.97)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn-on{background:#15803d}
+.btn-off{background:#b91c1c}
+.btn-test{background:var(--blue);width:100%;margin-top:12px}
+.input-group{margin-bottom:12px}
+.input-group label{
+  display:block;color:var(--muted);font-size:13px;margin-bottom:8px;
+}
+.input-group input{
+  width:100%;padding:13px;background:var(--bg);
+  border:1px solid var(--border);border-radius:9px;
+  color:white;outline:none;font-size:14px;
+}
+.input-group input:focus{border-color:var(--blue)}
+.message{
+  padding:12px;border-radius:9px;background:var(--panel2);
+  color:var(--muted);font-size:13px;margin-top:15px;text-align:center;
+}
+.message.success{color:var(--green)}
+.message.error{color:#f87171}
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.info-box{background:var(--panel2);padding:15px;border-radius:10px}
+.info-box p{font-size:12px;color:var(--muted);margin-bottom:7px}
+.info-box strong{font-size:15px}
+footer{text-align:center;color:var(--muted);font-size:12px;padding:15px}
+@media(max-width:500px){
+  body{padding:14px}
+  .logo h1{font-size:19px}
+  .card{padding:18px}
+  .controls{grid-template-columns:1fr}
+}
+</style>
 </head>
 
 <body>
-
 <div class="container">
 
-    <h1>NODE-RED LAMP CONTROL</h1>
+<header>
+  <div class="logo">
+    <h1>NODE-RED CONTROL</h1>
+    <p>Dashboard Monitoring dan Kontrol Lampu</p>
+  </div>
+  <div class="connection" id="connection">● Belum diuji</div>
+</header>
 
-    <p class="connection" id="connection">
-        MODE SIMULASI
-    </p>
-
-    <h2>STATUS LAMPU</h2>
-
+<section class="card">
+  <h2 class="card-title">Status Lampu</h2>
+  <div class="led-area">
     <div class="led" id="led"></div>
+    <div class="led-status" id="ledStatus">OFF</div>
+    <p class="description">Indikator status lampu virtual</p>
+  </div>
+</section>
 
-    <div class="status" id="status">
-        LAMPU MATI
+<section class="card">
+  <h2 class="card-title">Kontrol Lampu</h2>
+  <div class="controls">
+    <button class="btn btn-on" id="btnOn" onclick="setLamp('ON')">
+      ▲ PUSH UP<br><small>HIDUPKAN</small>
+    </button>
+    <button class="btn btn-off" id="btnOff" onclick="setLamp('OFF')">
+      ▼ PUSH DOWN<br><small>MATIKAN</small>
+    </button>
+  </div>
+  <div class="message" id="message">Menunggu perintah...</div>
+</section>
+
+<section class="card">
+  <h2 class="card-title">Konfigurasi Node-RED</h2>
+  <div class="input-group">
+    <label>Alamat API Node-RED</label>
+    <input type="url" id="apiUrl"
+      placeholder="https://alamat-server/lampu">
+  </div>
+  <button class="btn btn-test" onclick="saveConfig()">
+    SIMPAN KONFIGURASI
+  </button>
+  <button class="btn btn-test" onclick="testConnection()">
+    UJI KONEKSI
+  </button>
+</section>
+
+<section class="card">
+  <h2 class="card-title">Informasi Sistem</h2>
+  <div class="info-grid">
+    <div class="info-box">
+      <p>Platform</p><strong>GitHub Pages</strong>
     </div>
+    <div class="info-box">
+      <p>Backend</p><strong>Node-RED</strong>
+    </div>
+    <div class="info-box">
+      <p>Status Terakhir</p><strong id="lastStatus">OFF</strong>
+    </div>
+    <div class="info-box">
+      <p>Perintah Terakhir</p><strong id="lastCommand">-</strong>
+    </div>
+  </div>
+</section>
 
-    <button class="up" onclick="setLamp(true)">
-        PUSH UP
-    </button>
-
-    <button class="down" onclick="setLamp(false)">
-        PUSH DOWN
-    </button>
-
+<footer>Node-RED Lamp Control | Tedi Haryanto</footer>
 </div>
 
 <script>
-    function setLamp(state) {
+const DEFAULT_API = "http://127.0.0.1:1880/lampu";
 
-        const led = document.getElementById("led");
-        const status = document.getElementById("status");
+const apiInput = document.getElementById("apiUrl");
+const led = document.getElementById("led");
+const ledStatus = document.getElementById("ledStatus");
+const connection = document.getElementById("connection");
+const message = document.getElementById("message");
+const btnOn = document.getElementById("btnOn");
+const btnOff = document.getElementById("btnOff");
 
-        if (state) {
-            led.classList.add("on");
-            status.textContent = "LAMPU MENYALA";
-        } else {
-            led.classList.remove("on");
-            status.textContent = "LAMPU MATI";
-        }
+apiInput.value =
+  localStorage.getItem("nodeRedAPI") || DEFAULT_API;
+
+function showMessage(text, type = "") {
+  message.textContent = text;
+  message.className = "message " + type;
+}
+
+function updateLamp(state) {
+  const isOn = state === "ON";
+  led.classList.toggle("on", isOn);
+  ledStatus.textContent = state;
+  document.getElementById("lastStatus").textContent = state;
+}
+
+function setConnection(online) {
+  connection.textContent = online
+    ? "● Terhubung"
+    : "● Tidak terhubung";
+  connection.style.color = online ? "#22c55e" : "#ef4444";
+}
+
+function saveConfig() {
+  const url = apiInput.value.trim();
+
+  try {
+    const parsed = new URL(url);
+    if (!["http:", "https:"].includes(parsed.protocol)) {
+      throw new Error("Protokol URL tidak valid");
     }
-</script>
+    localStorage.setItem("nodeRedAPI", url);
+    showMessage("Alamat API berhasil disimpan", "success");
+  } catch (error) {
+    showMessage("Alamat API tidak valid", "error");
+  }
+}
 
+async function setLamp(state) {
+  const url = apiInput.value.trim();
+
+  btnOn.disabled = true;
+  btnOff.disabled = true;
+  showMessage("Mengirim perintah " + state + "...");
+
+  try {
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "text/plain"
+      },
+      body: state
+    });
+
+    const result = await response.json();
+
+    if (!response.ok || result.success !== true) {
+      throw new Error(result.message || "Perintah gagal");
+    }
+
+    updateLamp(result.status);
+    setConnection(true);
+
+    document.getElementById("lastCommand").textContent =
+      result.status;
+
+    showMessage("Perintah " + result.status + " berhasil", "success");
+
+  } catch (error) {
+    setConnection(false);
+    showMessage("Koneksi gagal: " + error.message, "error");
+  } finally {
+    btnOn.disabled = false;
+    btnOff.disabled = false;
+  }
+}
+
+async function testConnection() {
+  const url = apiInput.value.trim();
+
+  showMessage("Sedang menguji koneksi...");
+
+  try {
+    // Uji dengan perintah ON/OFF tidak dilakukan.
+    // Endpoint hanya menerima POST, sehingga pengujian
+    // koneksi dilakukan menggunakan GET dan mungkin 404/405.
+    const response = await fetch(url, {
+      method: "OPTIONS"
+    });
+
+    if (response.ok || response.status === 405) {
+      setConnection(true);
+      showMessage("Server merespons permintaan", "success");
+    } else {
+      throw new Error("Server merespons: " + response.status);
+    }
+  } catch (error) {
+    setConnection(false);
+    showMessage("Gagal menguji koneksi: " + error.message, "error");
+  }
+}
+</script>
 </body>
-</html>
+    </html>
+    
