@@ -1,0 +1,126 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Node-RED Lamp Control</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            background: #0b1220;
+            color: white;
+        }
+
+        .container {
+            max-width: 450px;
+            margin: 40px auto;
+            padding: 25px;
+            background: #111c2e;
+            border-radius: 18px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 24px;
+        }
+
+        .led {
+            width: 85px;
+            height: 85px;
+            border-radius: 50%;
+            background: #374151;
+            margin: 30px auto;
+            transition: 0.3s;
+        }
+
+        .led.on {
+            background: #22c55e;
+            box-shadow: 0 0 30px #22c55e;
+        }
+
+        .status {
+            font-size: 20px;
+            margin-bottom: 30px;
+        }
+
+        button {
+            width: 100%;
+            padding: 17px;
+            margin: 8px 0;
+            border: none;
+            border-radius: 9px;
+            font-size: 17px;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+        }
+
+        .up {
+            background: #16a34a;
+        }
+
+        .down {
+            background: #dc2626;
+        }
+
+        .connection {
+            color: #94a3b8;
+            font-size: 13px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>NODE-RED LAMP CONTROL</h1>
+
+    <p class="connection" id="connection">
+        MODE SIMULASI
+    </p>
+
+    <h2>STATUS LAMPU</h2>
+
+    <div class="led" id="led"></div>
+
+    <div class="status" id="status">
+        LAMPU MATI
+    </div>
+
+    <button class="up" onclick="setLamp(true)">
+        PUSH UP
+    </button>
+
+    <button class="down" onclick="setLamp(false)">
+        PUSH DOWN
+    </button>
+
+</div>
+
+<script>
+    function setLamp(state) {
+
+        const led = document.getElementById("led");
+        const status = document.getElementById("status");
+
+        if (state) {
+            led.classList.add("on");
+            status.textContent = "LAMPU MENYALA";
+        } else {
+            led.classList.remove("on");
+            status.textContent = "LAMPU MATI";
+        }
+    }
+</script>
+
+</body>
+</html>
